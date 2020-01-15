@@ -1,18 +1,18 @@
 import * as React from 'react'
-import { Button, Input } from 'antd'
+import { Button, Input, Spin, Card } from 'antd'
 
-import { withStore } from '@/src/store'
+import { withStore } from '@/src/components'
 
-// 声明一个接口 ，继承自 PageProps，包含 PageProps 中所有的属性以及自身定义的 id
-// ? 表示 属性 id 可以为空，在 : 前加上 ! 表示必填，默认必填
 interface DemoProps extends PageProps, StoreProps {
   id?: number
+  count: StoreStates['count']
+  count2: StoreStates['count2']
+  countAlias: StoreStates['count']
 }
 
-// declare interface 语法上等价于 interface 都是声明一个接口，此外还有 type = { 。。。}
 declare interface DemoState {
   count: number
-  resData: {}
+  resData: queryTestInfoUsingGET.Response | {}
   loading: boolean
 }
 
@@ -22,7 +22,7 @@ declare interface DemoState {
  * props 和 state 的默认值需要单独声明
  */
 
-@withStore(['count', 'count2'])
+@withStore(['count', 'count2', { countAlias: 'count' }])
 export default class Demo extends React.Component<DemoProps, DemoState> {
   // props 默认值
   static defaultProps = {
@@ -43,19 +43,25 @@ export default class Demo extends React.Component<DemoProps, DemoState> {
 
   componentDidMount() {
     console.log(this)
-
-    this.queryData()
   }
 
   render() {
     const { count, resData, loading } = this.state
-    const { count: reduxCount, count2 } = this.props
+    const { count: reduxCount, count2, countAlias } = this.props
     return (
       <div>
-        <div className="panel">
-          <p className="title-block">state count : {count}</p>
-          <p className="title-block fs-18">redux count : {reduxCount}</p>
-          <p className="title-block fs-18">redux count2 : {count2}</p>
+        <Card title="Image Test" className="mb-16">
+          <div className="flex center-v">
+            <img height="64" src={$tools.APP_ICON} />
+            <img className="ml-16" src={$tools.TRAY_ICON_DARK} />
+          </div>
+        </Card>
+
+        <Card title="Redux Test" className="mb-16">
+          <p>state count : {count}</p>
+          <p>redux count : {reduxCount}</p>
+          <p>redux count2 : {count2}</p>
+          <p>redux countAlias : {countAlias}</p>
 
           <div className="mt-16">
             <Button
@@ -81,32 +87,74 @@ export default class Demo extends React.Component<DemoProps, DemoState> {
               className="ml-16"
               type="primary"
               onClick={() => {
+                this.props.dispatch({ type: 'ACTION_ADD_COUNT', data: countAlias + 1 })
+              }}
+            >
+              add (redux) (alias)
+            </Button>
+
+            <Button
+              className="ml-16"
+              type="primary"
+              onClick={() => {
                 this.props.dispatch({ type: 'ACTION_ADD_COUNT2', data: count2 + 1 })
               }}
             >
-              add (redux) 2
+              add (redux) (count2)
             </Button>
           </div>
-        </div>
+        </Card>
 
-        <div className="panel mt-24">
-          <div className="mb-16">
-            <Button type="primary" loading={loading}>
-              Request
-            </Button>
-          </div>
+        <Spin spinning={loading}>
+          <Card title="Request Test" className="mb-16">
+            <div className="mb-16">
+              <Button type="primary" onClick={this.requestTest.bind(this)}>
+                Request
+              </Button>
 
-          <Input.TextArea value={JSON.stringify(resData)} />
-        </div>
+              <Button className="ml-16" type="primary" onClick={this.requestTestError.bind(this)}>
+                Request Error (notification)
+              </Button>
 
-        <img src={$tools.TRAY_ICON_DARK} alt="" />
+              <Button className="ml-16" type="primary" onClick={this.requestTestErrorModal.bind(this)}>
+                Request Error (modal)
+              </Button>
+            </div>
+
+            <Input.TextArea value={JSON.stringify(resData)} autoSize />
+          </Card>
+        </Spin>
       </div>
     )
   }
 
-  queryData() {
-    // $api.order.queryOrderPage({}).then(res => {
-    //   console.log(res)
-    // })
+  requestTest() {
+    this.setState({ loading: true })
+    $api
+      .queryTestInfo({})
+      .then(resData => {
+        this.setState({ resData })
+      })
+      .finally(() => this.setState({ loading: false }))
+  }
+
+  requestTestError() {
+    this.setState({ loading: true })
+    $api
+      .queryTestInfoError({})
+      .catch(resData => {
+        this.setState({ resData })
+      })
+      .finally(() => this.setState({ loading: false }))
+  }
+
+  requestTestErrorModal() {
+    this.setState({ loading: true })
+    $api
+      .queryTestInfoError({}, { errorType: 'modal' })
+      .catch(resData => {
+        this.setState({ resData })
+      })
+      .finally(() => this.setState({ loading: false }))
   }
 } // class Demo end

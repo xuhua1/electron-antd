@@ -1,7 +1,7 @@
 import path from 'path'
 import { Configuration } from 'webpack'
 
-import webpackConfigBase from './webpack.config.base'
+import webpackConfigBase, { tsLoader } from './webpack.config.base'
 import devConfig from './dev.config'
 
 const { dist, mainSource: appPath } = devConfig
@@ -18,6 +18,16 @@ const webpackConfig: Configuration = {
     path: path.join(dist, 'main'),
     filename: '[name].js',
     chunkFilename: '[name].js',
+  },
+
+  module: {
+    rules: [
+      {
+        test: /(?<!\.d)\.ts$/,
+        loader: [tsLoader, 'eslint-loader'],
+        exclude: /node_modules/,
+      },
+    ],
   },
 }
 

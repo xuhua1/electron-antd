@@ -24,7 +24,7 @@ export default class ElectronProcess {
           exConsole.warn(error)
         }
       } else {
-        exConsole.warn('Failed to restart: Main process does not exist')
+        exConsole.warn('Failed to restart: Main process does not exist.')
       }
     }
 
@@ -33,7 +33,7 @@ export default class ElectronProcess {
     if (this.isRestart) {
       this.debounce(() => {
         this.startElectron()
-      }, 2500) // 2.5 秒防抖
+      }, 1500) // 1.5 秒防抖
     } else {
       this.isRestart = true
       this.startElectron()
@@ -45,7 +45,7 @@ export default class ElectronProcess {
     this.process = spawn(electron, ['.'])
     this.restarting = false
     if (this.process) {
-      exConsole.success(`Electron main process has ${this.isRestart ? 'restarted' : 'started'}`)
+      exConsole.success(`Electron main process has ${this.isRestart ? 'restarted' : 'started'}.`)
 
       this.process.stdout.on('data', data => {
         let message: string = data.toString()

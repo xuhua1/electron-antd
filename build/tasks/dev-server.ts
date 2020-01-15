@@ -1,3 +1,4 @@
+import path from 'path'
 import chalk from 'chalk'
 import webpack from 'webpack'
 
@@ -34,6 +35,9 @@ function startMain(): Promise<webpack.Stats> {
   return new Promise(resolve => {
     webpackConfigMain.devtool = 'source-map'
     webpackConfigMain.watch = true
+    webpackConfigMain.watchOptions = {
+      ignored: ['**/*.tsx', '**/*.jsx'],
+    }
     webpack(webpackConfigMain, (err, stats) => {
       if (err) {
         throw err
@@ -77,7 +81,7 @@ function startRenderer(): Promise<webpack.Stats> {
 
     const rendererCompiler = webpack(webpackConfigRenderer)
     rendererCompiler.hooks.done.tap('done', stats => {
-      exConsole.success(`Server renderer server at ${chalk.magenta.underline(`http://${host}:${port}`)}`)
+      exConsole.success(`Server renderer start at ${chalk.magenta.underline(`http://${host}:${port}`)}`)
       resolve(stats)
     })
 

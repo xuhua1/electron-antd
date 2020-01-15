@@ -1,22 +1,24 @@
 import { app, Tray } from 'electron'
 
 import { creatAppTray } from './tray'
-import { createWindow } from './window'
+
+$tools.log.info(`Application <${$tools.APP_NAME}> launched.`)
 
 let tray: Tray
 
 app.on('ready', () => {
   tray = creatAppTray()
-  createWindow('home')
+  $tools.createWindow('home')
 })
 
 app.on('window-all-closed', function() {
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
+  // if (process.platform !== 'darwin') {
+  //   app.quit()
+  // }
 })
 
 app.on('before-quit', () => {
+  $tools.log.info(`Application <${$tools.APP_NAME}> has exited normally.`)
   if (process.platform === 'win32') {
     tray.destroy()
   }
